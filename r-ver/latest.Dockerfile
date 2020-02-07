@@ -1,9 +1,8 @@
 FROM debian:buster
 
 LABEL org.label-schema.license="GPL-2.0" \
-      org.label-schema.vcs-url="https://github.com/rocker-org/rocker-versioned" \
-      org.label-schema.vendor="Rocker Project" \
-      maintainer="Carl Boettiger <cboettig@ropensci.org>"
+      org.label-schema.vcs-url="https://gitlab.b-data.ch/r/r-ver" \
+      maintainer="Olivier Benz <olivier.benz@b-data.ch>"
 
 ARG R_VERSION
 ARG BUILD_DATE
@@ -110,9 +109,9 @@ RUN apt-get update \
   && chown root:staff /usr/local/lib/R/site-library \
   && chmod g+ws /usr/local/lib/R/site-library \
   ## Fix library path
-  && sed -i '/^R_LIBS_USER=.*$/d' /usr/local/lib/R/etc/Renviron \
-  && echo "R_LIBS_USER=\${R_LIBS_USER-'/usr/local/lib/R/site-library'}" >> /usr/local/lib/R/etc/Renviron \
-  && echo "R_LIBS=\${R_LIBS-'/usr/local/lib/R/site-library:/usr/local/lib/R/library:/usr/lib/R/library'}" >> /usr/local/lib/R/etc/Renviron \
+  #&& sed -i '/^R_LIBS_USER=.*$/d' /usr/local/lib/R/etc/Renviron \
+  && echo "R_LIBS_SITE=\${R_LIBS_SITE-'/usr/local/lib/R/site-library'}" >> /usr/local/lib/R/etc/Renviron \
+  #&& echo "R_LIBS=\${R_LIBS-'/usr/local/lib/R/site-library:/usr/local/lib/R/library:/usr/lib/R/library'}" >> /usr/local/lib/R/etc/Renviron \
   ## Set configured CRAN mirror
   && if [ -z "$BUILD_DATE" ]; then MRAN=$CRAN; \
    else MRAN=https://mran.microsoft.com/snapshot/${BUILD_DATE}; fi \
