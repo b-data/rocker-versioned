@@ -1,7 +1,7 @@
 FROM debian:buster
 
 LABEL org.label-schema.license="GPL-2.0" \
-      org.label-schema.vcs-url="https://gitlab.b-data.ch/r/r-ver" \
+      org.label-schema.vcs-url="https://gitlab.b-data.ch/r/docker-stack" \
       maintainer="Olivier Benz <olivier.benz@b-data.ch>"
 
 ARG R_VERSION
