@@ -6,6 +6,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
   CRAN: https://cloud.r-project.org
+  R_VERSION_UPDATE: "true"
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -30,6 +31,17 @@ build-latest:
     changes:
       - r-ver/latest.Dockerfile
 
+build-version:
+  stage: build
+  script:
+    - docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f r-ver/3.6.2.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:3.6.2
+  only:
+    refs:
+      - freeze-version
+    changes:
+      - r-ver/3.6.2.Dockerfile
+
 trigger-latest-build:
   stage: deploy
   before_script:
@@ -43,3 +55,6 @@ trigger-latest-build:
       - master
     changes:
       - r-ver/latest.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"
