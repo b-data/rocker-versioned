@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.6.3
+FROM registry.gitlab.b-data.ch/r/r-ver:3.6.3
 
 ARG RSTUDIO_VERSION
 #ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.2.5033}
@@ -94,8 +94,5 @@ COPY disable_auth_rserver.conf /etc/rstudio/disable_auth_rserver.conf
 COPY pam-helper.sh /usr/lib/rstudio-server/bin/pam-helper
 
 EXPOSE 8787
-
-## automatically link a shared volume for kitematic users
-VOLUME /home/rstudio/kitematic
 
 CMD ["/init"]
