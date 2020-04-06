@@ -31,7 +31,6 @@ RUN apt-get update \
     libjpeg62-turbo \
     libopenblas-dev \
     libpangocairo-1.0-0 \
-    libpcre3 \
     libpng16-16 \
     libreadline7 \
     libtiff5 \
@@ -52,7 +51,7 @@ RUN apt-get update \
     libpango1.0-dev \
     libjpeg-dev \
     libicu-dev \
-    libpcre3-dev \
+    libpcre2-dev \
     libpng-dev \
     libreadline-dev \
     libtiff5-dev \
