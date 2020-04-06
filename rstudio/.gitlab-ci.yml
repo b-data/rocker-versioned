@@ -17,7 +17,7 @@ before_script:
 build-latest:
   stage: build
   script:
-    - docker build --build-arg CRAN=$CRAN --pull -t $CI_REGISTRY_IMAGE:latest -f rstudio/latest.Dockerfile .
+    - cd rstudio && docker build --build-arg CRAN=$CRAN --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ
@@ -34,7 +34,7 @@ build-latest:
 build-version:
   stage: build
   script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f rstudio/3.6.2.Dockerfile .
+    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f 3.6.2.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:3.6.2
   only:
     refs:

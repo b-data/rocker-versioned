@@ -14,6 +14,7 @@ ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.9}
 ## Symlink pandoc, pandoc-citeproc so they are available system-wide
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
+    curl \
     file \
     git \
     libapparmor1 \
@@ -23,6 +24,7 @@ RUN apt-get update \
     libssl-dev \
     lsb-release \
     multiarch-support \
+    nano \
     psmisc \
     procps \
     python-setuptools \
