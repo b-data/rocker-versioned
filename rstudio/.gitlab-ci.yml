@@ -10,7 +10,7 @@ variables:
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  - export VERSION_MAJ_MIN_PAT=`sed -n "s|.*R_VERSION:-\([0-9]\.[0-9]\.[0-9]\).*|\1|p" rstudio/latest.Dockerfile`
+  - export VERSION_MAJ_MIN_PAT=`sed -n "s|.*r-ver:\([0-9]\.[0-9]\.[0-9]\).*|\1|p" rstudio/latest.Dockerfile`
   - export VERSION_MAJ_MIN=`echo "${VERSION_MAJ_MIN_PAT:0:3}"`
   - export VERSION_MAJ=`echo "${VERSION_MAJ_MIN_PAT:0:1}"`
 
