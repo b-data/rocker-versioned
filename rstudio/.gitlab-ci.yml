@@ -41,3 +41,35 @@ build-version:
       - freeze-version
     changes:
       - rstudio/3.6.2.Dockerfile
+
+trigger-latest-build:
+  stage: deploy
+  before_script:
+    - apk add --update curl
+    - rm -rf /var/cache/apk/*
+  script:
+    - curl -X POST -F token=$ROCKER_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/186/trigger/pipeline
+  only:
+    refs:
+      - master
+    changes:
+      - rstudio/latest.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"
+
+trigger-version-build:
+  stage: deploy
+  before_script:
+    - apk add --update curl
+    - rm -rf /var/cache/apk/*
+  script:
+    - curl -X POST -F token=$ROCKER_TIDYVERSE -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/186/trigger/pipeline
+  only:
+    refs:
+      - freeze-version
+    changes:
+      - rstudio/3.6.2.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"

@@ -42,7 +42,7 @@ build-version:
     changes:
       - r-ver/3.6.2.Dockerfile
 
-trigger-latest-build:
+trigger-latest-build-foreign:
   stage: deploy
   before_script:
     - apk add --update curl
@@ -58,3 +58,29 @@ trigger-latest-build:
   except:
     variables:
       - $R_VERSION_UPDATE == "true"
+
+trigger-latest-build:
+  stage: deploy
+  before_script:
+    - apk add --update curl
+    - rm -rf /var/cache/apk/*
+  script:
+    - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=master https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
+  only:
+    refs:
+      - master
+    changes:
+      - r-ver/latest.Dockerfile
+
+trigger-version-build:
+  stage: deploy
+  before_script:
+    - apk add --update curl
+    - rm -rf /var/cache/apk/*
+  script:
+    - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
+  only:
+    refs:
+      - freeze-version
+    changes:
+      - r-ver/3.6.2.Dockerfile
