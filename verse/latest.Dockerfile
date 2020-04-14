@@ -21,6 +21,8 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     ghostscript \
     less \
     libbz2-dev \
+    libgl1-mesa-dev \
+    libglu1-mesa-dev \
     libicu-dev \
     liblzma-dev \
     libhunspell-dev \
