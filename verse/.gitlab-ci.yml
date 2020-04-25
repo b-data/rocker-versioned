@@ -5,19 +5,18 @@ services:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
-  CRAN: https://cloud.r-project.org
   R_VERSION_UPDATE: "false"
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  - export VERSION_MAJ_MIN_PAT=`sed -n "s|.*R_VERSION:-\([0-9]\.[0-9]\.[0-9]\).*|\1|p" r-ver/latest.Dockerfile`
+  - export VERSION_MAJ_MIN_PAT=`cat verse/latest.Dockerfile | head -n1 | sed 's/.*\([0-9].[0-9].[0-9]\)/\1/'`
   - export VERSION_MAJ_MIN=`echo "${VERSION_MAJ_MIN_PAT:0:3}"`
   - export VERSION_MAJ=`echo "${VERSION_MAJ_MIN_PAT:0:1}"`
 
 build-latest:
   stage: build
   script:
-    - docker build --build-arg CRAN=$CRAN --pull -t $CI_REGISTRY_IMAGE:latest -f r-ver/latest.Dockerfile .
+    - cd verse && docker build --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ
@@ -29,32 +28,21 @@ build-latest:
     refs:
       - master
     changes:
-      - r-ver/latest.Dockerfile
+      - verse/latest.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"
 
 build-version:
   stage: build
   script:
-    - docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f r-ver/3.6.2.Dockerfile .
+    - cd verse && docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f 3.6.2.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:3.6.2
   only:
     refs:
       - freeze-version
     changes:
-      - r-ver/3.6.2.Dockerfile
-
-trigger-latest-build-foreign:
-  stage: deploy
-  before_script:
-    - apk add --update curl
-    - rm -rf /var/cache/apk/*
-  script:
-    - curl -X POST -F token=$R_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/173/trigger/pipeline
-    - curl -X POST -F token=$R_PLUMBER -F ref=master https://gitlab.b-data.ch/api/v4/projects/176/trigger/pipeline
-  only:
-    refs:
-      - master
-    changes:
-      - r-ver/latest.Dockerfile
+      - verse/3.6.2.Dockerfile
   except:
     variables:
       - $R_VERSION_UPDATE == "true"
@@ -65,12 +53,15 @@ trigger-latest-build:
     - apk add --update curl
     - rm -rf /var/cache/apk/*
   script:
-    - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=master https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
+    - curl -X POST -F token=$ROCKER_GEOSPATIAL -F ref=master https://gitlab.b-data.ch/api/v4/projects/188/trigger/pipeline
   only:
     refs:
       - master
     changes:
-      - r-ver/latest.Dockerfile
+      - verse/latest.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"
 
 trigger-version-build:
   stage: deploy
@@ -78,9 +69,12 @@ trigger-version-build:
     - apk add --update curl
     - rm -rf /var/cache/apk/*
   script:
-    - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
+    - curl -X POST -F token=$ROCKER_GEOSPATIAL -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/188/trigger/pipeline
   only:
     refs:
       - freeze-version
     changes:
-      - r-ver/3.6.2.Dockerfile
+      - verse/3.6.2.Dockerfile
+  except:
+    variables:
+      - $R_VERSION_UPDATE == "true"

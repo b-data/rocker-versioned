@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/rocker/tidyverse:3.6.3
+FROM rocker/tidyverse:3.6.2
 
 # Version-stable CTAN repo from the tlnet archive at texlive.info, used in the
 # TinyTeX installation: chosen as the frozen snapshot of the TeXLive release
@@ -15,15 +15,11 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && rm texlive-local.deb \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
-    cargo \
-    curl \
     default-jdk \
     fonts-roboto \
     ghostscript \
     less \
     libbz2-dev \
-    libgl1-mesa-dev \
-    libglu1-mesa-dev \
     libicu-dev \
     liblzma-dev \
     libhunspell-dev \
@@ -39,7 +35,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     texinfo \
     vim \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
+  && rm -rf /var/lib/apt/lists/ \
   ## Use tinytex for LaTeX installation
   && install2.r --error tinytex \
   ## Admin-based install of TinyTeX:
@@ -58,7 +54,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
       && rm -r /tmp/install-tl-*; \
     fi \
   && /opt/TinyTeX/bin/*/tlmgr path add \
-  && tlmgr install ae inconsolata listings metafont mfware parskip pdfcrop tex xcolor \
+  && tlmgr install ae inconsolata listings metafont mfware parskip pdfcrop tex \
   && tlmgr path add \
   && Rscript -e "tinytex::r_texmf()" \
   && chown -R root:staff /opt/TinyTeX \
@@ -68,9 +64,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && install2.r --error PKI \
   ## And some nice R packages for publishing-related stuff
   && install2.r --error --deps TRUE \
-    bookdown rticles rmdshower rJava \
-  ## Clean up
-  && rm -rf /tmp/*
+    bookdown rticles rmdshower rJava
 #
 ## Consider including:
 # - yihui/printr R package (when released to CRAN)

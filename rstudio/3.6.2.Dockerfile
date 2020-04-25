@@ -1,7 +1,7 @@
-FROM registry.gitlab.b-data.ch/r/r-ver:3.6.3
+FROM rocker/r-ver:3.6.2
 
 ARG RSTUDIO_VERSION
-#ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.2.5033}
+ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.2.5033}
 ARG S6_VERSION
 ARG PANDOC_TEMPLATES_VERSION
 ENV S6_VERSION=${S6_VERSION:-v1.21.7.0}
@@ -14,7 +14,6 @@ ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.9}
 ## Symlink pandoc, pandoc-citeproc so they are available system-wide
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    curl \
     file \
     git \
     libapparmor1 \
@@ -24,7 +23,6 @@ RUN apt-get update \
     libssl-dev \
     lsb-release \
     multiarch-support \
-    nano \
     psmisc \
     procps \
     python-setuptools \
@@ -96,5 +94,8 @@ COPY disable_auth_rserver.conf /etc/rstudio/disable_auth_rserver.conf
 COPY pam-helper.sh /usr/lib/rstudio-server/bin/pam-helper
 
 EXPOSE 8787
+
+## automatically link a shared volume for kitematic users
+VOLUME /home/rstudio/kitematic
 
 CMD ["/init"]

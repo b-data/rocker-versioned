@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/rocker/rstudio:3.6.3
+FROM rocker/rstudio:3.6.2
 
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libxml2-dev \
@@ -19,7 +19,5 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
     remotes \
     selectr \
     caTools \
-    BiocManager \
-  ## Clean up
-  && rm -rf /tmp/* \
-  && rm -rf /var/lib/apt/lists/*
+    BiocManager
+
