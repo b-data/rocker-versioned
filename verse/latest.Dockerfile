@@ -16,6 +16,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
     cargo \
+    curl \
     default-jdk \
     fonts-roboto \
     ghostscript \
