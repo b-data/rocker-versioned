@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/r/r-ver:3.6.3
+FROM registry.gitlab.b-data.ch/r/r-ver:4.0.0
 
 ARG RSTUDIO_VERSION
 #ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.2.5033}
