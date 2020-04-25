@@ -33,13 +33,13 @@ build-latest:
 build-version:
   stage: build
   script:
-    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:3.6.2 -f 3.6.2.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE:3.6.2
+    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:3.6.3 -f 3.6.3.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:3.6.3
   only:
     refs:
       - freeze-version
     changes:
-      - rstudio/3.6.2.Dockerfile
+      - rstudio/3.6.3.Dockerfile
 
 trigger-latest-build:
   stage: deploy
@@ -68,7 +68,7 @@ trigger-version-build:
     refs:
       - freeze-version
     changes:
-      - rstudio/3.6.2.Dockerfile
+      - rstudio/3.6.3.Dockerfile
   except:
     variables:
       - $R_VERSION_UPDATE == "true"
