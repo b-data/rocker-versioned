@@ -16,7 +16,7 @@ before_script:
 build-latest:
   stage: build
   script:
-    - cd rstudio && docker build --build-arg CRAN=$CRAN --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
+    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ
@@ -32,16 +32,12 @@ build-latest:
 build-version:
   stage: build
   script:
-    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:3.6.3 -f 3.6.3.Dockerfile .
-    - docker tag $CI_REGISTRY_IMAGE:3.6.3 $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
-    - docker tag $CI_REGISTRY_IMAGE:3.6.3 $CI_REGISTRY_IMAGE:$VERSION_MAJ
-    - docker push $CI_REGISTRY_IMAGE:3.6.3
-    - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
-    - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ
+    - cd rstudio && docker build --pull -t $CI_REGISTRY_IMAGE:4.0.0 -f 4.0.0.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:4.0.0
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
       changes:
-        - rstudio/3.6.3.Dockerfile
+        - rstudio/4.0.0.Dockerfile
 
 trigger-latest-build:
   stage: deploy
@@ -65,4 +61,4 @@ trigger-version-build:
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
       changes:
-        - rstudio/3.6.3.Dockerfile
+        - rstudio/4.0.0.Dockerfile
