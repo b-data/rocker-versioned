@@ -25,22 +25,24 @@ build-latest:
     - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ
-  only:
-    refs:
-      - master
-    changes:
-      - r-ver/latest.Dockerfile
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      changes:
+        - r-ver/latest.Dockerfile
 
 build-version:
   stage: build
   script:
     - docker build --pull -t $CI_REGISTRY_IMAGE:3.6.3 -f r-ver/3.6.3.Dockerfile .
+    - docker tag $CI_REGISTRY_IMAGE:3.6.3 $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
+    - docker tag $CI_REGISTRY_IMAGE:3.6.3 $CI_REGISTRY_IMAGE:$VERSION_MAJ
     - docker push $CI_REGISTRY_IMAGE:3.6.3
-  only:
-    refs:
-      - freeze-version
-    changes:
-      - r-ver/3.6.3.Dockerfile
+    - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
+    - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ
+  rules:
+    - if: $CI_COMMIT_BRANCH == "freeze-version"
+      changes:
+        - r-ver/3.6.3.Dockerfile
 
 trigger-latest-build-foreign:
   stage: deploy
@@ -50,14 +52,10 @@ trigger-latest-build-foreign:
   script:
     - curl -X POST -F token=$R_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/173/trigger/pipeline
     - curl -X POST -F token=$R_PLUMBER -F ref=master https://gitlab.b-data.ch/api/v4/projects/176/trigger/pipeline
-  only:
-    refs:
-      - master
-    changes:
-      - r-ver/latest.Dockerfile
-  except:
-    variables:
-      - $R_VERSION_UPDATE == "true"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master" && $R_VERSION_UPDATE != "true"
+      changes:
+        - r-ver/latest.Dockerfile
 
 trigger-latest-build:
   stage: deploy
@@ -66,11 +64,10 @@ trigger-latest-build:
     - rm -rf /var/cache/apk/*
   script:
     - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=master https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
-  only:
-    refs:
-      - master
-    changes:
-      - r-ver/latest.Dockerfile
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      changes:
+        - r-ver/latest.Dockerfile
 
 trigger-version-build:
   stage: deploy
@@ -79,8 +76,7 @@ trigger-version-build:
     - rm -rf /var/cache/apk/*
   script:
     - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
-  only:
-    refs:
-      - freeze-version
-    changes:
-      - r-ver/3.6.3.Dockerfile
+  rules:
+    - if: $CI_COMMIT_BRANCH == "freeze-version"
+      changes:
+        - r-ver/3.6.3.Dockerfile

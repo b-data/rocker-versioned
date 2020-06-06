@@ -9,7 +9,7 @@ ARG BUILD_DATE
 ARG CRAN
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
 ## No BUILD_DATE means that CRAN will default to latest 
-ENV R_VERSION=${R_VERSION:-3.6.3} \
+ENV R_VERSION=${R_VERSION:-4.0.0} \
     CRAN=${CRAN:-https://cran.rstudio.com} \ 
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
@@ -31,7 +31,7 @@ RUN apt-get update \
     libjpeg62-turbo \
     libopenblas-dev \
     libpangocairo-1.0-0 \
-    libpcre3 \
+    libpcre2-8-0 \
     libpng16-16 \
     libreadline7 \
     libtiff5 \
@@ -52,7 +52,7 @@ RUN apt-get update \
     libpango1.0-dev \
     libjpeg-dev \
     libicu-dev \
-    libpcre3-dev \
+    libpcre2-dev \
     libpng-dev \
     libreadline-dev \
     libtiff5-dev \
@@ -75,7 +75,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends $BUILDDEPS \
   && cd tmp/ \
   ## Download source code
-  && curl -O https://cran.r-project.org/src/base/R-3/R-${R_VERSION}.tar.gz \
+  && curl -O https://cran.r-project.org/src/base/R-4/R-${R_VERSION}.tar.gz \
   ## Extract source code
   && tar -xf R-${R_VERSION}.tar.gz \
   && cd R-${R_VERSION} \

@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/rocker/verse:3.6.3
+FROM registry.gitlab.b-data.ch/rocker/verse:4.0.0
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
