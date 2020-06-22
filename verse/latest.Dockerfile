@@ -31,6 +31,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     libmagick++-dev \
     libopenmpi-dev \
     libpcre2-dev \
+    libpoppler-cpp-dev \
     librdf0-dev \
     libtiff-dev \
     libv8-dev \
