@@ -11,6 +11,8 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   unixodbc-dev \
   libsasl2-dev \
   libtiff-dev \
+  libharfbuzz-dev \
+  libfribidi-dev \
   && install2.r --error BiocManager \
   && install2.r --error \
     --deps TRUE \
