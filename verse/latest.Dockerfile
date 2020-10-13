@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/rocker/tidyverse:4.0.1
+FROM registry.gitlab.b-data.ch/rocker/tidyverse:4.0.2
 
 # Version-stable CTAN repo from the tlnet archive at texlive.info, used in the
 # TinyTeX installation: chosen as the frozen snapshot of the TeXLive release
@@ -27,12 +27,11 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     libicu-dev \
     liblzma-dev \
     libhunspell-dev \
-    libjpeg-dev \
     libmagick++-dev \
     libopenmpi-dev \
     libpcre2-dev \
+    libpoppler-cpp-dev \
     librdf0-dev \
-    libtiff-dev \
     libv8-dev \
     libzmq3-dev \
     qpdf \
