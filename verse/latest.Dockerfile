@@ -28,13 +28,26 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     libopenmpi-dev \
     libpcre2-dev \
     libpoppler-cpp-dev \
+    # librdf0-dev depends on libcurl4-gnutls-dev
     librdf0-dev \
-    libv8-dev \
+    libnode-dev \
     libzmq3-dev \
     qpdf \
     ssh \
     texinfo \
     vim \
+  ## Install R package redland
+  && install2.r --error --skipinstalled redland \
+  ## Explicitly install runtime library sub-deps of librdf0-dev
+  && apt-get install -y \
+	  libcurl4-openssl-dev \
+	  libxslt-dev \
+	  librdf0 \
+	  redland-utils \
+	  rasqal-utils \
+	  raptor2-utils \
+  ## Get rid of librdf0-dev and its dependencies (incl. libcurl4-gnutls-dev)
+	&& apt-get -y autoremove \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   ## Admin-based install of TinyTeX:
