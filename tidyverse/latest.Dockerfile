@@ -13,6 +13,7 @@ RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libtiff-dev \
   libharfbuzz-dev \
   libfribidi-dev \
+  libgit2-dev \
   && install2.r --error BiocManager \
   && install2.r --error \
     --deps TRUE \
