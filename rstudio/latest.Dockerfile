@@ -21,6 +21,7 @@ RUN apt-get update \
     libclang-dev \
     libcurl4-openssl-dev \
     libedit2 \
+    libpq-dev \
     libssl-dev \
     lsb-release \
     multiarch-support \
