@@ -1,13 +1,13 @@
-FROM registry.gitlab.b-data.ch/r/r-ver:4.0.3
+FROM registry.gitlab.b-data.ch/r/r-ver:4.0.4
 
 ARG RSTUDIO_VERSION
-#ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.3.1093}
+#ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.4.1103}
 ARG S6_VERSION
 ARG PANDOC_TEMPLATES_VERSION
 ENV S6_VERSION=${S6_VERSION:-v1.21.7.0}
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
-ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.11.1.1}
+ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.10.1}
 
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
