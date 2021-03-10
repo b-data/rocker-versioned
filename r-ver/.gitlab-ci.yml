@@ -18,7 +18,7 @@
     --password-stdin $CI_REGISTRY
   - >
     export VERSION_MAJ_MIN_PAT=`sed -n
-    "s|.*GHC_VERSION_BUILD:-\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*|\1|p"
+    "s|.*R_VERSION:-\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*|\1|p"
     r-ver/latest.Dockerfile | head -1`
     
     export VERSION_MAJ_MIN=`echo $VERSION_MAJ_MIN_PAT |
