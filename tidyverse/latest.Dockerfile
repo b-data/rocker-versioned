@@ -1,4 +1,4 @@
-FROM registry.gitlab.b-data.ch/rocker/rstudio:4.0.5
+FROM registry.gitlab.b-data.ch/rocker/rstudio:4.1.0
 
 RUN apt-get update -qq && apt-get -y --no-install-recommends install \
   libxml2-dev \
