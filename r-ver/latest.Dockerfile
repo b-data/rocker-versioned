@@ -4,12 +4,14 @@ LABEL org.label-schema.license="GPL-2.0" \
       org.label-schema.vcs-url="https://gitlab.b-data.ch/r/docker-stack" \
       maintainer="Olivier Benz <olivier.benz@b-data.ch>"
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 ARG R_VERSION
 ARG BUILD_DATE
 ARG CRAN
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
 ## No BUILD_DATE means that CRAN will default to latest 
-ENV R_VERSION=${R_VERSION:-4.1.0} \
+ENV R_VERSION=${R_VERSION:-4.1.1} \
     CRAN=${CRAN:-https://cran.rstudio.com} \ 
     LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
