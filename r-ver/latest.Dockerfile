@@ -1,4 +1,4 @@
-FROM debian:buster
+FROM debian:bullseye
 
 LABEL org.label-schema.license="GPL-2.0" \
       org.label-schema.vcs-url="https://gitlab.b-data.ch/r/docker-stack" \
@@ -29,13 +29,13 @@ RUN apt-get update \
     libblas-dev \
     libbz2-1.0 \
     libcurl4 \
-    libicu63 \
+    libicu67 \
     libjpeg62-turbo \
     libopenblas-dev \
     libpangocairo-1.0-0 \
     libpcre2-8-0 \
     libpng16-16 \
-    libreadline7 \
+    libreadline8 \
     libtiff5 \
     liblzma5 \
     locales \

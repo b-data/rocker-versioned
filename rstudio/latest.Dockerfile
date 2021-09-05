@@ -9,7 +9,7 @@ ARG PANDOC_TEMPLATES_VERSION
 ENV S6_VERSION=${S6_VERSION:-v1.21.7.0}
 ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
-ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.14.1}
+ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.14.2}
 
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
@@ -26,7 +26,6 @@ RUN apt-get update \
     libpq-dev \
     libssl-dev \
     lsb-release \
-    multiarch-support \
     nano \
     psmisc \
     procps \
@@ -69,8 +68,13 @@ RUN apt-get update \
   &&  echo 'rsession-which-r=/usr/local/bin/R' >> /etc/rstudio/rserver.conf \
   ## use more robust file locking to avoid errors when using shared volumes:
   && echo 'lock-type=advisory' >> /etc/rstudio/file-locks \
-  ## configure git not to request password each time
-  && git config --system credential.helper 'cache --timeout=3600' \
+  ## Set default branch name to main
+  && git config --system init.defaultBranch main \
+  ## Store passwords for one hour in memory
+  && git config --system credential.helper "cache --timeout=3600" \
+  ## Merge the default branch from the default remote when "git pull" is run
+  && git config --system pull.rebase false \
+  # Push the current branch with the same name on the remote
   && git config --system push.default simple \
   ## Set up S6 init system
   && wget -P /tmp/ https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-amd64.tar.gz \
