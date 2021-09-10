@@ -1,15 +1,25 @@
+ARG BASE_IMAGE=debian:bullseye
+ARG GIT_VERSION=2.32.0
+
+FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${BASE_IMAGE} as gsi
+
 FROM registry.gitlab.b-data.ch/r/r-ver:4.1.1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG RSTUDIO_VERSION
-#ENV RSTUDIO_VERSION=${RSTUDIO_VERSION:-1.4.1717}
-ARG S6_VERSION
-ARG PANDOC_TEMPLATES_VERSION
-ENV S6_VERSION=${S6_VERSION:-v1.21.7.0}
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+ARG RSTUDIO_VERSION=1.4.1717
+ARG S6_VERSION=v1.21.7.0
+ARG GIT_VERSION=2.32.0
+ARG PANDOC_TEMPLATES_VERSION=2.14.2
+
+ENV RSTUDIO_VERSION=${RSTUDIO_VERSION}
 ENV PATH=/usr/lib/rstudio-server/bin:$PATH
-ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION:-2.14.2}
+ENV S6_VERSION=${S6_VERSION}
+ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+ENV GIT_VERSION=${GIT_VERSION}
+ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION}
+
+COPY --from=gsi /usr/local /usr/local
 
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
@@ -18,7 +28,6 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl \
     file \
-    git \
     libapparmor1 \
     libclang-dev \
     libcurl4-openssl-dev \
@@ -32,32 +41,33 @@ RUN apt-get update \
     python-setuptools \
     sudo \
     wget \
+    ## Additional git runtime dependencies
+    libcurl3-gnutls \
+    liberror-perl \
+    ## Additional git runtime recommendations
+    less \
+    ssh-client \
   && if [ -z "$RSTUDIO_VERSION" ]; \
     then RSTUDIO_URL="https://www.rstudio.org/download/latest/stable/server/bionic/rstudio-server-latest-amd64.deb"; \
     else RSTUDIO_URL="http://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"; fi \
   && wget -q $RSTUDIO_URL \
   && dpkg -i rstudio-server-*-amd64.deb \
   && rm rstudio-server-*-amd64.deb \
+  ## https://github.com/rocker-org/rocker-versioned2/issues/137
+  rm -f /var/lib/rstudio-server/secure-cookie-key \
   ## Symlink pandoc & standard pandoc templates for use system-wide
   && ln -s /usr/lib/rstudio-server/bin/pandoc/pandoc /usr/local/bin \
   && ln -s /usr/lib/rstudio-server/bin/pandoc/pandoc-citeproc /usr/local/bin \
   && git clone --recursive --branch ${PANDOC_TEMPLATES_VERSION} https://github.com/jgm/pandoc-templates \
+  && rm -rf /opt/pandoc/templates \
   && mkdir -p /opt/pandoc/templates \
   && cp -r pandoc-templates*/* /opt/pandoc/templates && rm -rf pandoc-templates* \
+  && rm -rf /root/.pandoc \
   && mkdir /root/.pandoc && ln -s /opt/pandoc/templates /root/.pandoc/templates \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/ \
+  && rm -rf /var/lib/apt/lists/* \
   ## RStudio wants an /etc/R, will populate from $R_HOME/etc
   && mkdir -p /etc/R \
-  ## Write config files in $R_HOME/etc
-  && echo '\n\
-    \n# Configure httr to perform out-of-band authentication if HTTR_LOCALHOST \
-    \n# is not set since a redirect to localhost may not work depending upon \
-    \n# where this Docker container is running. \
-    \nif(is.na(Sys.getenv("HTTR_LOCALHOST", unset=NA))) { \
-    \n  options(httr_oob_default = TRUE) \
-    \n}' >> /usr/local/lib/R/etc/Rprofile.site \
-  && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron \
   ## Need to configure non-root user for RStudio
   && useradd rstudio \
   && echo "rstudio:rstudio" | chpasswd \
@@ -65,7 +75,7 @@ RUN apt-get update \
 	&& chown rstudio:rstudio /home/rstudio \
 	&& addgroup rstudio staff \
   ## Prevent rstudio from deciding to use /usr/bin/R if a user apt-get installs a package
-  &&  echo 'rsession-which-r=/usr/local/bin/R' >> /etc/rstudio/rserver.conf \
+  && echo 'rsession-which-r=/usr/local/bin/R' >> /etc/rstudio/rserver.conf \
   ## use more robust file locking to avoid errors when using shared volumes:
   && echo 'lock-type=advisory' >> /etc/rstudio/file-locks \
   ## Set default branch name to main
@@ -82,12 +92,16 @@ RUN apt-get update \
   && mkdir -p /etc/services.d/rstudio \
   && echo '#!/usr/bin/with-contenv bash \
           \n## load /etc/environment vars first: \
-  		  \n for line in $( cat /etc/environment ) ; do export $line ; done \
-          \n exec /usr/lib/rstudio-server/bin/rserver --server-daemonize 0' \
+  		    \nfor line in $( cat /etc/environment ) ; do export $line > /dev/null; done \
+          \nexec /usr/lib/rstudio-server/bin/rserver --server-daemonize 0' \
           > /etc/services.d/rstudio/run \
   && echo '#!/bin/bash \
-          \n rstudio-server stop' \
+          \nrstudio-server stop' \
           > /etc/services.d/rstudio/finish \
+  && echo '[*] \
+          \nlog-level=warn \
+          \nlogger-type=stderr' \
+          > /etc/rstudio/logging.conf \
   && mkdir -p /home/rstudio/.rstudio/monitored/user-settings \
   && echo 'alwaysSaveHistory="0" \
           \nloadRData="0" \

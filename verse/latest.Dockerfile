@@ -19,7 +19,6 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     fonts-roboto \
     ghostscript \
     lbzip2 \
-    less \
     libbz2-dev \
     libgl1-mesa-dev \
     libglu1-mesa-dev \
@@ -35,7 +34,6 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     libnode-dev \
     libzmq3-dev \
     qpdf \
-    ssh \
     texinfo \
     vim \
   ## Install R package redland
