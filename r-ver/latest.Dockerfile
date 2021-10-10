@@ -22,7 +22,6 @@ ARG CRAN=https://cran.rstudio.com
 ENV BASE_IMAGE=${IMAGE} \
     R_VERSION=${R_VERSION} \
     CRAN=${CRAN} \ 
-    LC_ALL=en_US.UTF-8 \
     LANG=en_US.UTF-8 \
     TERM=xterm \
     TZ=Etc/UTC
@@ -59,9 +58,9 @@ RUN apt-get update \
     zip \
     zlib1g \
   ## Update locale
-  && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-  && locale-gen en_US.utf8 \
-  && /usr/sbin/update-locale LANG=en_US.UTF-8 \
+  && sed -i "s/# $LANG/$LANG/g" /etc/locale.gen \
+  && locale-gen \
+  && update-locale LANG=$LANG \
   ## Add a library directory (for user-installed packages)
   && mkdir -p /usr/local/lib/R/site-library \
   && chown root:staff /usr/local/lib/R/site-library \
@@ -83,4 +82,3 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 CMD ["R"]
-
