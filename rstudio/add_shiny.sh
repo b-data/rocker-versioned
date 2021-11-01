@@ -2,10 +2,10 @@
 
 ADD=${ADD:=none}
 
-## A script to add shiny to an rstudio-based rocker image.  
+## A script to add shiny to an rstudio-based rocker image.
 
 if [ "$ADD" == "shiny" ]; then
-  echo "Adding shiny server to container..."	
+  echo "Adding shiny server to container..."
   apt-get update && apt-get -y install \
     gdebi-core \
     libxt-dev && \
@@ -28,5 +28,5 @@ if [ "$ADD" == "shiny" ]; then
 fi
 
 if [ $"$ADD" == "none" ]; then
-       echo "Nothing additional to add"
-fi       
+  echo "Nothing additional to add"
+fi

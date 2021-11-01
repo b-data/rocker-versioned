@@ -1,4 +1,6 @@
-FROM registry.gitlab.b-data.ch/rocker/verse:4.1.0
+FROM registry.gitlab.b-data.ch/rocker/verse:4.1.1
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -11,7 +13,6 @@ RUN apt-get update \
     libhdf4-alt-dev \
     libhdf5-dev \
     libjq-dev \
-    liblwgeom-dev \
     libpq-dev \
     libproj-dev \
     libprotobuf-dev \
