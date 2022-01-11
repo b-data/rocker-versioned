@@ -46,12 +46,12 @@ RUN apt-get update \
     '^libjpeg.*-turbo.*-dev$' \
     liblzma-dev \
     ${LAPACK} \
-    libpangocairo-* \
+    libpangocairo-1.0.0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
     libpng-dev \
     libreadline-dev \
-    libtiff* \
+    libtiff5 \
     locales \
     pkg-config \
     unzip \
