@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG R_VERSION=4.1.1
+ARG R_VERSION=4.1.2
 
 FROM registry.gitlab.b-data.ch/r/rsi/${R_VERSION}/${IMAGE} as rsi
 
@@ -14,7 +14,7 @@ ARG IMAGE=debian:bullseye
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG LAPACK=libopenblas-dev
-ARG R_VERSION=4.1.1
+ARG R_VERSION=4.1.2
 ARG BUILD_DATE
 ARG CRAN=https://cran.rstudio.com
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
@@ -46,12 +46,12 @@ RUN apt-get update \
     '^libjpeg.*-turbo.*-dev$' \
     liblzma-dev \
     ${LAPACK} \
-    libpangocairo-* \
+    libpangocairo-1.0.0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
     libpng-dev \
     libreadline-dev \
-    libtiff* \
+    libtiff5 \
     locales \
     pkg-config \
     unzip \
