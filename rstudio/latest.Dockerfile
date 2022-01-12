@@ -1,25 +1,26 @@
-ARG BASE_IMAGE=debian:bullseye
-ARG GIT_VERSION=2.33.1
+ARG IMAGE=debian:bullseye
+ARG GIT_VERSION=2.34.1
 
-FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${BASE_IMAGE} as gsi
+FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
 FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG RSTUDIO_VERSION=2021.09.0-351
-ARG S6_VERSION=v1.21.7.0
-ARG GIT_VERSION=2.33.1
+ARG GIT_VERSION=2.34.1
 ARG PANDOC_TEMPLATES_VERSION=2.14.1
+ARG RSTUDIO_VERSION=2021.09.2+382
+ARG S6_VERSION=v2.2.0.3
 
-ENV RSTUDIO_VERSION=${RSTUDIO_VERSION}
-ENV PATH=/usr/lib/rstudio-server/bin:$PATH
-ENV S6_VERSION=${S6_VERSION}
-ENV S6_BEHAVIOUR_IF_STAGE2_FAILS=2
-ENV GIT_VERSION=${GIT_VERSION}
-ENV PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION}
+ENV GIT_VERSION=${GIT_VERSION} \
+    PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION} \
+    RSTUDIO_VERSION=${RSTUDIO_VERSION} \
+    S6_VERSION=${S6_VERSION} \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    PATH=/usr/lib/rstudio-server/bin:$PATH
 
 COPY --from=gsi /usr/local /usr/local
+COPY --from=gsi /etc/bash_completion.d /etc/bash_completion.d
 
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
@@ -48,9 +49,8 @@ RUN apt-get update \
     less \
     ssh-client \
   && if [ -z "$RSTUDIO_VERSION" ]; \
-    then RSTUDIO_URL="https://www.rstudio.org/download/latest/stable/server/bionic/rstudio-server-latest-amd64.deb"; \
-    else RSTUDIO_URL="http://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION}-amd64.deb"; fi \
-  && wget -q $RSTUDIO_URL \
+    then wget "https://www.rstudio.org/download/latest/stable/server/bionic/rstudio-server-latest-amd64.deb"; \
+    else /bin/bash -c 'wget "http://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION/'+'/'-'}-amd64.deb"'; fi \
   && dpkg -i rstudio-server-*-amd64.deb \
   && rm rstudio-server-*-amd64.deb \
   ## https://github.com/rocker-org/rocker-versioned2/issues/137
@@ -68,6 +68,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/* \
   ## RStudio wants an /etc/R, will populate from $R_HOME/etc
   && mkdir -p /etc/R \
+  && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
   ## Need to configure non-root user for RStudio
   && useradd rstudio \
   && echo "rstudio:rstudio" | chpasswd \
@@ -88,7 +89,9 @@ RUN apt-get update \
   && git config --system push.default simple \
   ## Set up S6 init system
   && wget -P /tmp/ https://github.com/just-containers/s6-overlay/releases/download/${S6_VERSION}/s6-overlay-amd64.tar.gz \
-  && tar xzf /tmp/s6-overlay-amd64.tar.gz -C / \
+  ## need the modified double tar now, see https://github.com/just-containers/s6-overlay/issues/288
+  && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C / --exclude=usr/bin/execlineb \
+  && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C /usr ./bin/execlineb && $_clean \
   && mkdir -p /etc/services.d/rstudio \
   && echo '#!/usr/bin/with-contenv bash \
           \n## load /etc/environment vars first: \
@@ -100,14 +103,17 @@ RUN apt-get update \
           > /etc/services.d/rstudio/finish \
   && echo '[*] \
           \nlog-level=warn \
-          \nlogger-type=stderr' \
+          \nlogger-type=syslog' \
           > /etc/rstudio/logging.conf \
   && mkdir -p /home/rstudio/.rstudio/monitored/user-settings \
   && echo 'alwaysSaveHistory="0" \
           \nloadRData="0" \
           \nsaveAction="0"' \
           > /home/rstudio/.rstudio/monitored/user-settings/user-settings \
-  && chown -R rstudio:rstudio /home/rstudio/.rstudio
+  && chown -R rstudio:rstudio /home/rstudio/.rstudio \
+  ## Clean up
+  && rm -rf /tmp/* \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY userconf.sh /etc/cont-init.d/userconf
 
