@@ -36,7 +36,7 @@
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
     CRAN: https://cloud.r-project.org
-    R_VERSION_UPDATE: "false"
+    R_VERSION_UPDATE: "true"
   before_script:
     - *before-script-build
 
@@ -171,6 +171,7 @@ trigger-latest-build-foreign:
   extends: .build
   stage: .post
   before_script:
+    - apk upgrade --no-cache
     - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$R_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/173/trigger/pipeline
@@ -184,6 +185,7 @@ trigger-latest-build:
   extends: .build
   stage: .post
   before_script:
+    - apk upgrade --no-cache
     - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=master https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline
@@ -196,6 +198,7 @@ trigger-version-build:
   extends: .build
   stage: .post
   before_script:
+    - apk upgrade --no-cache
     - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_RSTUDIO -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/185/trigger/pipeline

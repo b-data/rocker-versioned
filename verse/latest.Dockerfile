@@ -2,7 +2,7 @@ FROM registry.gitlab.b-data.ch/rocker/tidyverse:4.1.2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG CTAN_REPO=${CTAN_REPO:-http://mirror.ctan.org/systems/texlive/tlnet}
+ARG CTAN_REPO=${CTAN_REPO:-https://mirror.ctan.org/systems/texlive/tlnet}
 ENV CTAN_REPO=${CTAN_REPO}
 
 ENV PATH=/opt/TinyTeX/bin/x86_64-linux:$PATH
@@ -18,8 +18,11 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     default-jdk \
     fonts-roboto \
     ghostscript \
+    hugo \
     lbzip2 \
     libbz2-dev \
+    libglpk-dev \
+    libgmp3-dev \
     libgl1-mesa-dev \
     libglu1-mesa-dev \
     libicu-dev \
@@ -27,7 +30,6 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
     libhunspell-dev \
     libmagick++-dev \
     libopenmpi-dev \
-    libpcre2-dev \
     libpoppler-cpp-dev \
     # librdf0-dev depends on libcurl4-gnutls-dev
     librdf0-dev \
@@ -48,7 +50,6 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
 	  raptor2-utils \
   ## Get rid of librdf0-dev and its dependencies (incl. libcurl4-gnutls-dev)
 	&& apt-get -y autoremove \
-  && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   ## Admin-based install of TinyTeX:
   && wget -qO- "https://yihui.org/tinytex/install-unx.sh" \
@@ -69,9 +70,15 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && chmod -R g+w /opt/TinyTeX \
   && chmod -R g+wx /opt/TinyTeX/bin \
   && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron \
-  && install2.r --error PKI \
+  && install2.r --error --skipinstalled PKI \
   ## And some nice R packages for publishing-related stuff
-  && install2.r --error --deps TRUE \
-    blogdown bookdown rticles rmdshower rJava xaringan \
+  && install2.r --error --deps TRUE --skipinstalled \
+    blogdown \
+    bookdown \
+    distill \
+    rticles \
+    rmdshower \
+    rJava \
+    xaringan \
   ## Clean up
   && rm -rf /tmp/*

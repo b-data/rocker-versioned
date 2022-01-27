@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG GIT_VERSION=2.34.1
+ARG GIT_VERSION=2.35.0
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
@@ -7,7 +7,7 @@ FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG GIT_VERSION=2.34.1
+ARG GIT_VERSION=2.35.0
 ARG PANDOC_TEMPLATES_VERSION=2.14.1
 ARG RSTUDIO_VERSION=2021.09.2+382
 ARG S6_VERSION=v2.2.0.3
@@ -64,8 +64,6 @@ RUN apt-get update \
   && cp -r pandoc-templates*/* /opt/pandoc/templates && rm -rf pandoc-templates* \
   && rm -rf /root/.pandoc \
   && mkdir /root/.pandoc && ln -s /opt/pandoc/templates /root/.pandoc/templates \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
   ## RStudio wants an /etc/R, will populate from $R_HOME/etc
   && mkdir -p /etc/R \
   && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
@@ -92,6 +90,7 @@ RUN apt-get update \
   ## need the modified double tar now, see https://github.com/just-containers/s6-overlay/issues/288
   && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C / --exclude=usr/bin/execlineb \
   && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C /usr ./bin/execlineb && $_clean \
+  ## Set up RStudio init scripts
   && mkdir -p /etc/services.d/rstudio \
   && echo '#!/usr/bin/with-contenv bash \
           \n## load /etc/environment vars first: \
@@ -101,10 +100,12 @@ RUN apt-get update \
   && echo '#!/bin/bash \
           \nrstudio-server stop' \
           > /etc/services.d/rstudio/finish \
+  ## Log to syslog
   && echo '[*] \
           \nlog-level=warn \
           \nlogger-type=syslog' \
           > /etc/rstudio/logging.conf \
+  ## Rocker's default RStudio settings, for better reproducibility
   && mkdir -p /home/rstudio/.rstudio/monitored/user-settings \
   && echo 'alwaysSaveHistory="0" \
           \nloadRData="0" \
