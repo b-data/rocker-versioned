@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG GIT_VERSION=2.35.0
+ARG GIT_VERSION=2.35.1
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
@@ -7,7 +7,7 @@ FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG GIT_VERSION=2.35.0
+ARG GIT_VERSION=2.35.1
 ARG PANDOC_TEMPLATES_VERSION=2.14.1
 ARG RSTUDIO_VERSION=2021.09.2+382
 ARG S6_VERSION=v2.2.0.3

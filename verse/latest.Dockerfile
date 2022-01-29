@@ -69,7 +69,7 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && chown -R root:staff /opt/TinyTeX \
   && chmod -R g+w /opt/TinyTeX \
   && chmod -R g+wx /opt/TinyTeX/bin \
-  && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron \
+  && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
   && install2.r --error --skipinstalled PKI \
   ## And some nice R packages for publishing-related stuff
   && install2.r --error --deps TRUE --skipinstalled \

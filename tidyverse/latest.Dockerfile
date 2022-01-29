@@ -4,6 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
   && apt-get -y --no-install-recommends install \
+    cmake \
     libxml2-dev \
     libcairo2-dev \
     libsqlite3-dev \
