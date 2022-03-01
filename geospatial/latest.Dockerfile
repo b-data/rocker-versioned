@@ -1,5 +1,7 @@
 FROM registry.gitlab.b-data.ch/rocker/verse:4.1.2
 
+ARG NCPUS=1
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
@@ -22,7 +24,7 @@ RUN apt-get update \
     sqlite3 \
     tk-dev \
     unixodbc-dev \
-  && install2.r --error --skipinstalled \
+  && install2.r --error --skipinstalled -n $NCPUS \
     RColorBrewer \
     RandomFields \
     RNetCDF \

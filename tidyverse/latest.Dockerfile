@@ -1,5 +1,7 @@
 FROM registry.gitlab.b-data.ch/rocker/rstudio:4.1.2
 
+ARG NCPUS=1
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
@@ -17,14 +19,14 @@ RUN apt-get update \
     libfribidi-dev \
     libgit2-dev \
     libxtst6 \
-  && install2.r --error BiocManager \
-  && install2.r --error --deps TRUE --skipinstalled \
+  && install2.r --error -n $NCPUS BiocManager \
+  && install2.r --error --deps TRUE --skipinstalled -n $NCPUS \
     tidyverse \
     dplyr \
     devtools \
     formatR \
   ## dplyr database backends
-  && install2.r --error --skipinstalled \
+  && install2.r --error --skipinstalled -n $NCPUS \
     arrow \
     duckdb \
     fst \

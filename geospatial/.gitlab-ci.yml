@@ -5,7 +5,7 @@ services:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
-  R_VERSION_UPDATE: "false"
+  R_VERSION_UPDATE: "true"
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -16,7 +16,9 @@ before_script:
 build-latest:
   stage: build
   script:
-    - cd geospatial && docker build --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
+    - >
+      cd geospatial && docker build --pull --build-arg NCPUS=$((`nproc`/2+1))
+      -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ
@@ -32,7 +34,9 @@ build-latest:
 build-version:
   stage: build
   script:
-    - cd geospatial && docker build --pull -t $CI_REGISTRY_IMAGE:4.1.1 -f 4.1.1.Dockerfile .
+    - >
+      cd geospatial && docker build --pull --build-arg NCPUS=$((`nproc`/2+1))
+      -t $CI_REGISTRY_IMAGE:4.1.1 -f 4.1.1.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:4.1.1
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
