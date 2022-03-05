@@ -98,6 +98,10 @@ if [ "$TZ" !=  "Etc/UTC" ]
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 fi
 
+## Set environment variable PANDOC_VERSION
+PANDOC_VERSION=$(pandoc --version 2>/dev/null | head -n 1 | grep -oP '[\d\.]+$')
+echo "$PANDOC_VERSION" >> /var/run/s6/container_environment/PANDOC_VERSION
+
 ## Set our dynamic variables in Renviron.site to be reflected by RStudio
 exclude_vars="HOME PASSWORD"
 for file in /var/run/s6/container_environment/*
