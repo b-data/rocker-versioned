@@ -5,7 +5,7 @@ services:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
-  R_VERSION_UPDATE: "false"
+  UPDATE_MODE: "false"
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -27,7 +27,7 @@ build-latest:
     - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker push $CI_REGISTRY_IMAGE:$VERSION_MAJ
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" && $R_VERSION_UPDATE != "true"
+    - if: $CI_COMMIT_BRANCH == "master" && $UPDATE_MODE != "true"
       changes:
         - verse/latest.Dockerfile
 
@@ -36,12 +36,12 @@ build-version:
   script:
     - >
       cd verse && docker build --pull --build-arg NCPUS=$((`nproc`/2+1))
-      -t $CI_REGISTRY_IMAGE:4.1.1 -f 4.1.1.Dockerfile .
-    - docker push $CI_REGISTRY_IMAGE:4.1.1
+      -t $CI_REGISTRY_IMAGE:4.1.2 -f 4.1.2.Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:4.1.2
   rules:
-    - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
+    - if: $CI_COMMIT_BRANCH == "freeze-version" && $UPDATE_MODE != "true"
       changes:
-        - verse/4.1.1.Dockerfile
+        - verse/4.1.2.Dockerfile
 
 trigger-latest-build:
   stage: deploy
@@ -51,7 +51,7 @@ trigger-latest-build:
   script:
     - curl -X POST -F token=$ROCKER_GEOSPATIAL -F ref=master https://gitlab.b-data.ch/api/v4/projects/188/trigger/pipeline
   rules:
-    - if: $CI_COMMIT_BRANCH == "master" && $R_VERSION_UPDATE != "true"
+    - if: $CI_COMMIT_BRANCH == "master" && $UPDATE_MODE != "true"
       changes:
         - verse/latest.Dockerfile
 
@@ -63,6 +63,6 @@ trigger-version-build:
   script:
     - curl -X POST -F token=$ROCKER_GEOSPATIAL -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/188/trigger/pipeline
   rules:
-    - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
+    - if: $CI_COMMIT_BRANCH == "freeze-version" && $UPDATE_MODE != "true"
       changes:
-        - verse/4.1.1.Dockerfile
+        - verse/4.1.2.Dockerfile
