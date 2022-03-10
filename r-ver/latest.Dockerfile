@@ -66,14 +66,14 @@ RUN apt-get update \
   && chown root:staff /usr/local/lib/R/site-library \
   && chmod g+ws /usr/local/lib/R/site-library \
   ## Fix library path
-  && echo "R_LIBS_SITE=\${R_LIBS_SITE-'/usr/local/lib/R/site-library'}" >> /usr/local/lib/R/etc/Renviron \
+  && echo "R_LIBS_SITE=\${R_LIBS_SITE-'/usr/local/lib/R/site-library'}" >> /usr/local/lib/R/etc/Renviron.site \
   ## Set configured CRAN mirror
   && if [ -z "$BUILD_DATE" ]; then MRAN=$CRAN; \
    else MRAN=https://mran.microsoft.com/snapshot/${BUILD_DATE}; fi \
    && echo MRAN=$MRAN >> /etc/environment \
   && echo "options(repos = c(CRAN='$MRAN'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
   ## Use littler installation scripts
-  && Rscript -e "install.packages(c('littler', 'docopt'), repo = '$CRAN')" \
+  && Rscript -e "install.packages(c('littler', 'docopt'), repos = '$CRAN')" \
   && ln -s /usr/local/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
   && ln -s /usr/local/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
   && ln -s /usr/local/lib/R/site-library/littler/bin/r /usr/local/bin/r \

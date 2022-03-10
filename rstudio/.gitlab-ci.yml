@@ -42,8 +42,8 @@ build-version:
 trigger-latest-build:
   stage: deploy
   before_script:
-    - apk add --update curl
-    - rm -rf /var/cache/apk/*
+    - apk upgrade --no-cache
+    - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/186/trigger/pipeline
   rules:
@@ -54,8 +54,8 @@ trigger-latest-build:
 trigger-version-build:
   stage: deploy
   before_script:
-    - apk add --update curl
-    - rm -rf /var/cache/apk/*
+    - apk upgrade --no-cache
+    - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_TIDYVERSE -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/186/trigger/pipeline
   rules:

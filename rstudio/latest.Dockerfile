@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG GIT_VERSION=2.34.1
+ARG GIT_VERSION=2.35.1
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
@@ -7,13 +7,11 @@ FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG GIT_VERSION=2.34.1
-ARG PANDOC_TEMPLATES_VERSION=2.14.1
-ARG RSTUDIO_VERSION=2021.09.2+382
+ARG GIT_VERSION=2.35.1
+ARG RSTUDIO_VERSION=2022.02.0+443
 ARG S6_VERSION=v2.2.0.3
 
 ENV GIT_VERSION=${GIT_VERSION} \
-    PANDOC_TEMPLATES_VERSION=${PANDOC_TEMPLATES_VERSION} \
     RSTUDIO_VERSION=${RSTUDIO_VERSION} \
     S6_VERSION=${S6_VERSION} \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
@@ -24,7 +22,6 @@ COPY --from=gsi /etc/bash_completion.d /etc/bash_completion.d
 
 ## Download and install RStudio server & dependencies
 ## Attempts to get detect latest version, otherwise falls back to version given in $VER
-## Symlink pandoc, pandoc-citeproc so they are available system-wide
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl \
@@ -50,22 +47,31 @@ RUN apt-get update \
     ssh-client \
   && if [ -z "$RSTUDIO_VERSION" ]; \
     then wget "https://www.rstudio.org/download/latest/stable/server/bionic/rstudio-server-latest-amd64.deb"; \
-    else /bin/bash -c 'wget "http://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION/'+'/'-'}-amd64.deb"'; fi \
+    else /bin/bash -c 'wget "http://download2.rstudio.org/server/bionic/amd64/rstudio-server-${RSTUDIO_VERSION/'+'/'-'}-amd64.deb"'; \
+  fi \
   && dpkg -i rstudio-server-*-amd64.deb \
   && rm rstudio-server-*-amd64.deb \
   ## https://github.com/rocker-org/rocker-versioned2/issues/137
   rm -f /var/lib/rstudio-server/secure-cookie-key \
+  ## Symlink pandoc, pandoc-citeproc so they are available system-wide
+  && if [ -f "/usr/lib/rstudio-server/bin/pandoc/pandoc" ]; then \
+    BUNDLED_PANDOC="/usr/lib/rstudio-server/bin/pandoc/pandoc"; \
+  elif [ -f "/usr/lib/rstudio-server/bin/quarto/bin/pandoc" ]; then \
+    BUNDLED_PANDOC="/usr/lib/rstudio-server/bin/quarto/bin/pandoc"; \
+  fi \
+  && ln -s "$BUNDLED_PANDOC" /usr/local/bin \
+  && if [ -f "${BUNDLED_PANDOC}-citeproc" ]; then \
+    ln -s "${BUNDLED_PANDOC}-citeproc" /usr/local/bin; \
+  fi \
   ## Symlink pandoc & standard pandoc templates for use system-wide
-  && ln -s /usr/lib/rstudio-server/bin/pandoc/pandoc /usr/local/bin \
-  && ln -s /usr/lib/rstudio-server/bin/pandoc/pandoc-citeproc /usr/local/bin \
-  && git clone --recursive --branch ${PANDOC_TEMPLATES_VERSION} https://github.com/jgm/pandoc-templates \
+  && PANDOC_TEMPLATES_VERSION=$(pandoc -v | grep -oP "(?<=pandoc\s)[0-9\.]+$") \
+  && wget "https://github.com/jgm/pandoc-templates/archive/${PANDOC_TEMPLATES_VERSION}.tar.gz" -O pandoc-templates.tar.gz \
   && rm -rf /opt/pandoc/templates \
   && mkdir -p /opt/pandoc/templates \
+  && tar xvf pandoc-templates.tar.gz \
   && cp -r pandoc-templates*/* /opt/pandoc/templates && rm -rf pandoc-templates* \
   && rm -rf /root/.pandoc \
   && mkdir /root/.pandoc && ln -s /opt/pandoc/templates /root/.pandoc/templates \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
   ## RStudio wants an /etc/R, will populate from $R_HOME/etc
   && mkdir -p /etc/R \
   && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
@@ -92,6 +98,7 @@ RUN apt-get update \
   ## need the modified double tar now, see https://github.com/just-containers/s6-overlay/issues/288
   && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C / --exclude=usr/bin/execlineb \
   && tar hzxf /tmp/s6-overlay-amd64.tar.gz -C /usr ./bin/execlineb && $_clean \
+  ## Set up RStudio init scripts
   && mkdir -p /etc/services.d/rstudio \
   && echo '#!/usr/bin/with-contenv bash \
           \n## load /etc/environment vars first: \
@@ -101,10 +108,12 @@ RUN apt-get update \
   && echo '#!/bin/bash \
           \nrstudio-server stop' \
           > /etc/services.d/rstudio/finish \
+  ## Log to syslog
   && echo '[*] \
           \nlog-level=warn \
           \nlogger-type=syslog' \
           > /etc/rstudio/logging.conf \
+  ## Rocker's default RStudio settings, for better reproducibility
   && mkdir -p /home/rstudio/.rstudio/monitored/user-settings \
   && echo 'alwaysSaveHistory="0" \
           \nloadRData="0" \

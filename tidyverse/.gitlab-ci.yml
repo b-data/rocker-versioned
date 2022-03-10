@@ -16,7 +16,9 @@ before_script:
 build-latest:
   stage: build
   script:
-    - cd tidyverse && docker build --pull -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
+    - >
+      cd tidyverse && docker build --pull --build-arg NCPUS=$((`nproc`/2+1))
+      -t $CI_REGISTRY_IMAGE:latest -f latest.Dockerfile .
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
     - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$VERSION_MAJ
@@ -32,7 +34,9 @@ build-latest:
 build-version:
   stage: build
   script:
-    - cd tidyverse && docker build --pull -t $CI_REGISTRY_IMAGE:4.1.1 -f 4.1.1.Dockerfile .
+    - >
+      cd tidyverse && docker build --pull --build-arg NCPUS=$((`nproc`/2+1))
+      -t $CI_REGISTRY_IMAGE:4.1.1 -f 4.1.1.Dockerfile .
     - docker push $CI_REGISTRY_IMAGE:4.1.1
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $R_VERSION_UPDATE != "true"
@@ -42,8 +46,8 @@ build-version:
 trigger-latest-build:
   stage: deploy
   before_script:
-    - apk add --update curl
-    - rm -rf /var/cache/apk/*
+    - apk upgrade --no-cache
+    - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_VERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/187/trigger/pipeline
   rules:
@@ -54,8 +58,8 @@ trigger-latest-build:
 trigger-version-build:
   stage: deploy
   before_script:
-    - apk add --update curl
-    - rm -rf /var/cache/apk/*
+    - apk upgrade --no-cache
+    - apk add --update --no-cache curl
   script:
     - curl -X POST -F token=$ROCKER_VERSE -F ref=freeze-version https://gitlab.b-data.ch/api/v4/projects/187/trigger/pipeline
   rules:
