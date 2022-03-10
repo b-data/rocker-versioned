@@ -3,7 +3,7 @@ ARG GIT_VERSION=2.35.1
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
-FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
+FROM registry.gitlab.b-data.ch/r/r-ver:4.1.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
