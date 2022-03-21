@@ -39,11 +39,11 @@ RUN apt-get update \
     g++ \
     gfortran \
     gsfonts \
-    libblas-dev \
     libbz2-dev \
     '^libcurl[3|4]$' \
     libicu-dev \
     '^libjpeg.*-turbo.*-dev$' \
+    liblapack-dev \
     liblzma-dev \
     ${BLAS} \
     libpangocairo-1.0.0 \
@@ -57,6 +57,13 @@ RUN apt-get update \
     unzip \
     zip \
     zlib1g \
+  ## Switch BLAS/LAPACK (manual mode)
+  && if [ ${BLAS} = "libopenblas-dev" ]; then \
+    update-alternatives --set libblas.so.3-$(uname -m)-linux-gnu \
+      /usr/lib/$(uname -m)-linux-gnu/openblas-pthread/libblas.so.3; \
+    update-alternatives --set liblapack.so.3-$(uname -m)-linux-gnu \
+      /usr/lib/$(uname -m)-linux-gnu/openblas-pthread/liblapack.so.3; \
+  fi \
   ## Update locale
   && sed -i "s/# $LANG/$LANG/g" /etc/locale.gen \
   && locale-gen \
