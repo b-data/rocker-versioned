@@ -26,7 +26,6 @@ RUN apt-get update \
     devtools \
     formatR \
   ## dplyr database backends
-  && Rscript -e "devtools::install_version('fstcore', version = '0.9.8')" \
   && install2.r --error --skipinstalled -n $NCPUS \
     arrow \
     duckdb \
