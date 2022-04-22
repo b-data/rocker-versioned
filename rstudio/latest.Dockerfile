@@ -1,13 +1,13 @@
 ARG IMAGE=debian:bullseye
-ARG GIT_VERSION=2.35.1
+ARG GIT_VERSION=2.36.0
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
-FROM registry.gitlab.b-data.ch/r/r-ver:4.1.3
+FROM registry.gitlab.b-data.ch/r/r-ver:4.2.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG GIT_VERSION=2.35.1
+ARG GIT_VERSION=2.36.0
 ARG RSTUDIO_VERSION=2022.02.1+461
 ARG S6_VERSION=v2.2.0.3
 

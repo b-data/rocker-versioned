@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG R_VERSION=4.1.3
+ARG R_VERSION=4.2.0
 
 FROM registry.gitlab.b-data.ch/r/rsi/${R_VERSION}/${IMAGE} as rsi
 
@@ -14,7 +14,7 @@ ARG IMAGE=debian:bullseye
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG BLAS=libopenblas-dev
-ARG R_VERSION=4.1.3
+ARG R_VERSION=4.2.0
 ARG BUILD_DATE
 ARG CRAN=https://cran.rstudio.com
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
