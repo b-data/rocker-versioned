@@ -3,12 +3,12 @@ ARG GIT_VERSION=2.35.1
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
 
-FROM registry.gitlab.b-data.ch/r/r-ver:4.1.2
+FROM registry.gitlab.b-data.ch/r/r-ver:4.1.3
 
 ARG DEBIAN_FRONTEND=noninteractive
 
 ARG GIT_VERSION=2.35.1
-ARG RSTUDIO_VERSION=2022.02.0+443
+ARG RSTUDIO_VERSION=2022.02.1+461
 ARG S6_VERSION=v2.2.0.3
 
 ENV GIT_VERSION=${GIT_VERSION} \
@@ -58,6 +58,8 @@ RUN apt-get update \
     BUNDLED_PANDOC="/usr/lib/rstudio-server/bin/pandoc/pandoc"; \
   elif [ -f "/usr/lib/rstudio-server/bin/quarto/bin/pandoc" ]; then \
     BUNDLED_PANDOC="/usr/lib/rstudio-server/bin/quarto/bin/pandoc"; \
+  elif [ -f "/usr/lib/rstudio-server/bin/quarto/bin/tools/pandoc" ]; then \
+    BUNDLED_PANDOC="/usr/lib/rstudio-server/bin/quarto/bin/tools/pandoc"; \
   fi \
   && ln -s "$BUNDLED_PANDOC" /usr/local/bin \
   && if [ -f "${BUNDLED_PANDOC}-citeproc" ]; then \

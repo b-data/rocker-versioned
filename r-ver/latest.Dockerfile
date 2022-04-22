@@ -1,5 +1,5 @@
 ARG IMAGE=debian:bullseye
-ARG R_VERSION=4.1.2
+ARG R_VERSION=4.1.3
 
 FROM registry.gitlab.b-data.ch/r/rsi/${R_VERSION}/${IMAGE} as rsi
 
@@ -13,8 +13,8 @@ LABEL org.opencontainers.image.licenses="GPL-2.0" \
 ARG IMAGE=debian:bullseye
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG LAPACK=libopenblas-dev
-ARG R_VERSION=4.1.2
+ARG BLAS=libopenblas-dev
+ARG R_VERSION=4.1.3
 ARG BUILD_DATE
 ARG CRAN=https://cran.rstudio.com
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
@@ -39,13 +39,13 @@ RUN apt-get update \
     g++ \
     gfortran \
     gsfonts \
-    libblas-dev \
     libbz2-dev \
     '^libcurl[3|4]$' \
     libicu-dev \
     '^libjpeg.*-turbo.*-dev$' \
+    liblapack-dev \
     liblzma-dev \
-    ${LAPACK} \
+    ${BLAS} \
     libpangocairo-1.0.0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
@@ -57,6 +57,13 @@ RUN apt-get update \
     unzip \
     zip \
     zlib1g \
+  ## Switch BLAS/LAPACK (manual mode)
+  && if [ ${BLAS} = "libopenblas-dev" ]; then \
+    update-alternatives --set libblas.so.3-$(uname -m)-linux-gnu \
+      /usr/lib/$(uname -m)-linux-gnu/openblas-pthread/libblas.so.3; \
+    update-alternatives --set liblapack.so.3-$(uname -m)-linux-gnu \
+      /usr/lib/$(uname -m)-linux-gnu/openblas-pthread/liblapack.so.3; \
+  fi \
   ## Update locale
   && sed -i "s/# $LANG/$LANG/g" /etc/locale.gen \
   && locale-gen \

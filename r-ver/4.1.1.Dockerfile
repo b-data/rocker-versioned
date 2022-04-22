@@ -13,7 +13,7 @@ LABEL org.opencontainers.image.licenses="GPL-2.0" \
 ARG IMAGE=debian:bullseye
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG LAPACK=libopenblas-dev
+ARG BLAS=libopenblas-dev
 ARG R_VERSION=4.1.1
 ARG BUILD_DATE
 ARG CRAN=https://cran.rstudio.com
@@ -45,7 +45,7 @@ RUN apt-get update \
     libicu-dev \
     '^libjpeg.*-turbo.*-dev$' \
     liblzma-dev \
-    ${LAPACK} \
+    ${BLAS} \
     libpangocairo-1.0.0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
