@@ -46,7 +46,7 @@ RUN apt-get update \
     liblapack-dev \
     liblzma-dev \
     ${BLAS} \
-    libpangocairo-1.0.0 \
+    libpangocairo-1.0-0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
     libpng-dev \
