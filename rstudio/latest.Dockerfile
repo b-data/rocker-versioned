@@ -1,6 +1,6 @@
 ARG IMAGE=debian:bullseye
 ARG GIT_VERSION=2.36.1
-ARG RSTUDIO_VERSION=2022.02.2+485
+ARG RSTUDIO_VERSION=2022.02.3+492
 ARG S6_VERSION=v2.2.0.3
 
 FROM registry.gitlab.b-data.ch/git/gsi/${GIT_VERSION}/${IMAGE} as gsi
@@ -23,7 +23,7 @@ COPY --from=gsi /usr/local /usr/local
 COPY --from=gsi /etc/bash_completion.d /etc/bash_completion.d
 
 ## Download and install RStudio server & dependencies
-## Attempts to get detect latest version, otherwise falls back to version given in $VER
+## Attempts to detect latest version, otherwise falls back to $RSTUDIO_VERSION
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     curl \
