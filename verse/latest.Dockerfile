@@ -58,13 +58,15 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && wget -qO- "https://yihui.org/tinytex/install-unx.sh" \
     | sh -s - --admin --no-path \
   && mv ~/.TinyTeX /opt/TinyTeX \
-  && /opt/TinyTeX/bin/*/tlmgr path add \
+  && ln -rs /opt/TinyTeX/bin/$(uname -m)-linux \
+    /opt/TinyTeX/bin/${TARGETARCH}-linux \
+  && /opt/TinyTeX/bin/${TARGETARCH}-linux/tlmgr path add \
   && tlmgr update --self \
   && tlmgr install \
     ae \
     cm-super \
-    dvipng \
     context \
+    dvipng \
     listings \
     makeindex \
     parskip \
@@ -74,8 +76,6 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && chown -R root:staff /opt/TinyTeX \
   && chmod -R g+w /opt/TinyTeX \
   && chmod -R g+wx /opt/TinyTeX/bin \
-  && ln -rs /opt/TinyTeX/bin/$(uname -m)-linux \
-    /opt/TinyTeX/bin/${TARGETARCH}-linux \
   && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
   && install2.r --error --skipinstalled -n $NCPUS PKI \
   ## And some nice R packages for publishing-related stuff
