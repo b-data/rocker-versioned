@@ -4,10 +4,11 @@ ARG NCPUS=1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+ARG TARGETARCH
 ARG CTAN_REPO=${CTAN_REPO:-https://mirror.ctan.org/systems/texlive/tlnet}
 ENV CTAN_REPO=${CTAN_REPO}
 
-ENV PATH=/opt/TinyTeX/bin/x86_64-linux:$PATH
+ENV PATH=/opt/TinyTeX/bin/${TARGETARCH}-linux:$PATH
 
 ## Add LaTeX, rticles and bookdown support
 RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
@@ -61,6 +62,8 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && tlmgr update --self \
   && tlmgr install \
     ae \
+    cm-super \
+    dvipng \
     context \
     listings \
     makeindex \
@@ -71,6 +74,8 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && chown -R root:staff /opt/TinyTeX \
   && chmod -R g+w /opt/TinyTeX \
   && chmod -R g+wx /opt/TinyTeX/bin \
+  && ln -rs /opt/TinyTeX/bin/$(uname -m)-linux \
+    /opt/TinyTeX/bin/${TARGETARCH}-linux \
   && echo "PATH=${PATH}" >> /usr/local/lib/R/etc/Renviron.site \
   && install2.r --error --skipinstalled -n $NCPUS PKI \
   ## And some nice R packages for publishing-related stuff
