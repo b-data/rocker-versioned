@@ -6,7 +6,7 @@ variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
   R_VERSION: "4.2.0"
-  UPDATE_MODE: "true"
+  UPDATE_MODE: "false"
 
 before_script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
