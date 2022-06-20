@@ -1,4 +1,6 @@
-FROM registry.gitlab.b-data.ch/rocker/rstudio:4.2.0
+ARG R_VERSION
+
+FROM registry.gitlab.b-data.ch/rocker/rstudio:${R_VERSION}
 
 ARG NCPUS=1
 
