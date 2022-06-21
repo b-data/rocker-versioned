@@ -45,7 +45,7 @@ build:latest-linux-amd64:
       --build-arg R_VERSION
       -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
       -t $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-amd64
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      -f r-ver/latest.Dockerfile .
     - docker push -a $CI_APP_REPO
   rules:
     - if: $CI_COMMIT_BRANCH == "master" && $CI_BUILD_PLATFORMS =~ /(linux\/amd64)/
@@ -64,7 +64,7 @@ build:latest-linux-arm64v8:
       --build-arg R_VERSION
       -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
       -t $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-arm64v8
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      -f r-ver/latest.Dockerfile .
     - docker push -a $CI_APP_REPO
   rules:
     - if: $CI_COMMIT_BRANCH == "master" && $CI_BUILD_PLATFORMS =~ /(linux\/arm64\/v8)/
@@ -82,7 +82,7 @@ build:version-linux-amd64:
       --build-arg CRAN
       --build-arg R_VERSION
       -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      -f r-ver/$R_VERSION.Dockerfile .
     - docker push $CI_APP_REPO:$CI_APP_TAG-linux-amd64
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $CI_BUILD_PLATFORMS =~ /(linux\/amd64)/
@@ -100,7 +100,7 @@ build:version-linux-arm64v8:
       --build-arg CRAN
       --build-arg R_VERSION
       -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      -f r-ver/$R_VERSION.Dockerfile .
     - docker push $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $CI_BUILD_PLATFORMS =~ /(linux\/arm64\/v8)/
