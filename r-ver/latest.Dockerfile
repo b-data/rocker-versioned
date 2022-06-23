@@ -1,22 +1,24 @@
 ARG IMAGE=debian:bullseye
-ARG R_VERSION=4.1.3
+ARG BLAS=libopenblas-dev
+ARG R_VERSION
+ARG CRAN=https://cran.rstudio.com
 
 FROM registry.gitlab.b-data.ch/r/rsi/${R_VERSION}/${IMAGE} as rsi
 
 FROM ${IMAGE}
 
 LABEL org.opencontainers.image.licenses="GPL-2.0" \
-      org.opencontainers.image.source="https://gitlab.b-data.ch/r/docker-stack" \
+      org.opencontainers.image.source="https://gitlab.b-data.ch/rocker/docker-stack" \
       org.opencontainers.image.vendor="b-data GmbH" \
       org.opencontainers.image.authors="Olivier Benz <olivier.benz@b-data.ch>"
 
-ARG IMAGE=debian:bullseye
+ARG IMAGE
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG BLAS=libopenblas-dev
-ARG R_VERSION=4.1.3
+ARG BLAS
+ARG R_VERSION
+ARG CRAN
 ARG BUILD_DATE
-ARG CRAN=https://cran.rstudio.com
 ## Setting a BUILD_DATE will set CRAN to the matching MRAN date
 ## No BUILD_DATE means that CRAN will default to latest 
 ENV BASE_IMAGE=${IMAGE} \
@@ -46,7 +48,7 @@ RUN apt-get update \
     liblapack-dev \
     liblzma-dev \
     ${BLAS} \
-    libpangocairo-1.0.0 \
+    libpangocairo-1.0-0 \
     libpaper-utils \
     '^libpcre[2|3]-dev$' \
     libpng-dev \
@@ -72,15 +74,13 @@ RUN apt-get update \
   && mkdir -p /usr/local/lib/R/site-library \
   && chown root:staff /usr/local/lib/R/site-library \
   && chmod g+ws /usr/local/lib/R/site-library \
-  ## Fix library path
-  && echo "R_LIBS_SITE=\${R_LIBS_SITE-'/usr/local/lib/R/site-library'}" >> /usr/local/lib/R/etc/Renviron.site \
   ## Set configured CRAN mirror
   && if [ -z "$BUILD_DATE" ]; then MRAN=$CRAN; \
    else MRAN=https://mran.microsoft.com/snapshot/${BUILD_DATE}; fi \
-   && echo MRAN=$MRAN >> /etc/environment \
+  && echo MRAN=$MRAN >> /etc/environment \
   && echo "options(repos = c(CRAN='$MRAN'), download.file.method = 'libcurl')" >> /usr/local/lib/R/etc/Rprofile.site \
   ## Use littler installation scripts
-  && Rscript -e "install.packages(c('littler', 'docopt'), repos = '$CRAN')" \
+  && Rscript -e "install.packages(c('littler', 'docopt'), repos = '$MRAN')" \
   && ln -s /usr/local/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
   && ln -s /usr/local/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
   && ln -s /usr/local/lib/R/site-library/littler/bin/r /usr/local/bin/r \

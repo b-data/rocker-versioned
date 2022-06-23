@@ -9,7 +9,7 @@
     if [[ $CI_COMMIT_BRANCH == "master" ]]; then
       export CI_APP_TAG=${CI_APP_TAG:-latest}
     elif [[ $CI_COMMIT_BRANCH == "freeze-version" ]]; then
-      export CI_APP_TAG=${CI_APP_TAG:-4.1.3}
+      export CI_APP_TAG=${CI_APP_TAG:-$R_VERSION}
     else
       export CI_APP_TAG=${CI_APP_TAG:-$CI_COMMIT_SHA}
     fi
@@ -17,9 +17,7 @@
     echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER
     --password-stdin $CI_REGISTRY
   - >
-    export VERSION_MAJ_MIN_PAT=`sed -n
-    "s|.*R_VERSION=\([[:digit:]]\+\.[[:digit:]]\+\.[[:digit:]]\+\).*|\1|p"
-    r-ver/$CI_APP_TAG.Dockerfile | head -1`
+    export VERSION_MAJ_MIN_PAT=$R_VERSION
     
     export VERSION_MAJ_MIN=`echo $VERSION_MAJ_MIN_PAT |
     sed -n "s|\([[:digit:]]\+\.[[:digit:]]\+\).*|\1|p"`
@@ -35,8 +33,8 @@
   variables:
     DOCKER_DRIVER: overlay2
     DOCKER_TLS_CERTDIR: "/certs"
-    CRAN: https://cloud.r-project.org
-    UPDATE_MODE: "false"
+    R_VERSION: "4.2.0"
+    CRAN: "https://cloud.r-project.org"
   before_script:
     - *before-script-build
 
@@ -47,12 +45,13 @@ build:latest-linux-amd64:
     - os:linux
   script:
     - >
-      docker build --build-arg CRAN=$CRAN --pull -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
+      docker build --pull
+      --build-arg CRAN
+      --build-arg R_VERSION
+      -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
       -t $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-amd64
-      -f r-ver/$CI_APP_TAG.Dockerfile .
-    - |
-      docker push $CI_APP_REPO:$CI_APP_TAG-linux-amd64
-      docker push $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-amd64
+      -f r-ver/latest.Dockerfile .
+    - docker push -a $CI_APP_REPO
   rules:
     - if: $CI_COMMIT_BRANCH == "master" && $CI_BUILD_PLATFORMS =~ /(linux\/amd64)/
       changes:
@@ -65,12 +64,13 @@ build:latest-linux-arm64v8:
     - os:linux
   script:
     - >
-      docker build --build-arg CRAN=$CRAN --pull -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
+      docker build --pull
+      --build-arg CRAN
+      --build-arg R_VERSION
+      -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
       -t $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-arm64v8
-      -f r-ver/$CI_APP_TAG.Dockerfile .
-    - |
-      docker push $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
-      docker push $CI_APP_REPO:$VERSION_MAJ_MIN_PAT-linux-arm64v8
+      -f r-ver/latest.Dockerfile .
+    - docker push -a $CI_APP_REPO
   rules:
     - if: $CI_COMMIT_BRANCH == "master" && $CI_BUILD_PLATFORMS =~ /(linux\/arm64\/v8)/
       changes:
@@ -83,13 +83,16 @@ build:version-linux-amd64:
     - os:linux
   script:
     - >
-      docker build --build-arg CRAN=$CRAN --pull -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      docker build --pull
+      --build-arg CRAN
+      --build-arg R_VERSION
+      -t $CI_APP_REPO:$CI_APP_TAG-linux-amd64
+      -f r-ver/$R_VERSION.Dockerfile .
     - docker push $CI_APP_REPO:$CI_APP_TAG-linux-amd64
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $CI_BUILD_PLATFORMS =~ /(linux\/amd64)/
       changes:
-        - r-ver/4.1.3.Dockerfile
+        - r-ver/$R_VERSION.Dockerfile
 
 build:version-linux-arm64v8:
   extends: .build
@@ -98,13 +101,16 @@ build:version-linux-arm64v8:
     - os:linux
   script:
     - >
-      docker build --build-arg CRAN=$CRAN --pull -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
-      -f r-ver/$CI_APP_TAG.Dockerfile .
+      docker build --pull
+      --build-arg CRAN
+      --build-arg R_VERSION
+      -t $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
+      -f r-ver/$R_VERSION.Dockerfile .
     - docker push $CI_APP_REPO:$CI_APP_TAG-linux-arm64v8
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version" && $CI_BUILD_PLATFORMS =~ /(linux\/arm64\/v8)/
       changes:
-        - r-ver/4.1.3.Dockerfile
+        - r-ver/$R_VERSION.Dockerfile
 
 build-manifest:latest-linux-multiarch:
   extends: .build
@@ -165,21 +171,7 @@ build-manifest:version-linux-multiarch:
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version"
       changes:
-        - r-ver/4.1.3.Dockerfile
-
-trigger-latest-build-foreign:
-  extends: .build
-  stage: .post
-  before_script:
-    - apk upgrade --no-cache
-    - apk add --update --no-cache curl
-  script:
-    - curl -X POST -F token=$R_TIDYVERSE -F ref=master https://gitlab.b-data.ch/api/v4/projects/173/trigger/pipeline
-    - curl -X POST -F token=$R_PLUMBER -F ref=master https://gitlab.b-data.ch/api/v4/projects/176/trigger/pipeline
-  rules:
-    - if: $CI_COMMIT_BRANCH == "master" && $UPDATE_MODE != "true"
-      changes:
-        - r-ver/latest.Dockerfile
+        - r-ver/$R_VERSION.Dockerfile
 
 trigger-latest-build:
   extends: .build
@@ -205,4 +197,4 @@ trigger-version-build:
   rules:
     - if: $CI_COMMIT_BRANCH == "freeze-version"
       changes:
-        - r-ver/4.1.3.Dockerfile
+        - r-ver/$R_VERSION.Dockerfile

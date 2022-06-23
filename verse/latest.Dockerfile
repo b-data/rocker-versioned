@@ -1,13 +1,16 @@
-FROM registry.gitlab.b-data.ch/rocker/tidyverse:4.1.3
+ARG R_VERSION
+ARG CTAN_REPO=https://mirror.ctan.org/systems/texlive/tlnet
+
+FROM registry.gitlab.b-data.ch/rocker/tidyverse:${R_VERSION}
 
 ARG NCPUS=1
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG CTAN_REPO=${CTAN_REPO:-https://mirror.ctan.org/systems/texlive/tlnet}
-ENV CTAN_REPO=${CTAN_REPO}
+ARG CTAN_REPO
 
-ENV PATH=/opt/TinyTeX/bin/x86_64-linux:$PATH
+ENV CTAN_REPO=${CTAN_REPO} \
+    PATH=/opt/TinyTeX/bin/linux:$PATH
 
 ## Add LaTeX, rticles and bookdown support
 RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
@@ -57,11 +60,15 @@ RUN wget "https://travis-bin.yihui.name/texlive-local.deb" \
   && wget -qO- "https://yihui.org/tinytex/install-unx.sh" \
     | sh -s - --admin --no-path \
   && mv ~/.TinyTeX /opt/TinyTeX \
-  && /opt/TinyTeX/bin/*/tlmgr path add \
+  && ln -rs /opt/TinyTeX/bin/$(uname -m)-linux \
+    /opt/TinyTeX/bin/linux \
+  && /opt/TinyTeX/bin/linux/tlmgr path add \
   && tlmgr update --self \
   && tlmgr install \
     ae \
+    cm-super \
     context \
+    dvipng \
     listings \
     makeindex \
     parskip \
