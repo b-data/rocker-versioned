@@ -45,6 +45,8 @@ build-version:
       cd rstudio && docker build --pull
       --build-arg R_VERSION
       -t $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
+      -t $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
+      -t $CI_REGISTRY_IMAGE:$VERSION_MAJ
       -f $R_VERSION.Dockerfile .
     - docker push -a $CI_REGISTRY_IMAGE
   rules:

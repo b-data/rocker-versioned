@@ -47,6 +47,8 @@ build-version:
       --build-arg R_VERSION
       --build-arg NCPUS=$((`nproc`/2+1))
       -t $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN_PAT
+      -t $CI_REGISTRY_IMAGE:$VERSION_MAJ_MIN
+      -t $CI_REGISTRY_IMAGE:$VERSION_MAJ
       -f geospatial/$R_VERSION.Dockerfile .
     - docker push -a $CI_REGISTRY_IMAGE
   rules:
